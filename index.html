@@ -1136,7 +1136,7 @@
                 const last = e.target.result ? new Date(e.target.result.value) : null;
                 if (!last || (Date.now() - last.getTime()) / (1000 * 60 * 60 * 24) >= reminderDays) {
                     if (confirm('Waktunya backup! Sudah 7 hari atau belum pernah backup. OK untuk backup via WA?')) {
-                        const waNumber = '6281234567890';
+                        const waNumber = '6289661006297';
                         const text = 'Backup data aplikasi: ' + encodeURIComponent(JSON.stringify({ /* data */ }));
                         window.open(`https://wa.me/${waNumber}?text=${text}`, '_blank');
                         saveLastBackup();
