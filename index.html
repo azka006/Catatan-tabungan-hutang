@@ -1,0 +1,1223 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- PWA Meta Tags -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#3498db"/>
+    <link rel="manifest" href="/manifest.json">
+    
+    <!-- iOS Support -->
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/icons/icon-192x192.png">
+    <title>Aplikasi Catatan Tabungan & Hutang</title>
+    <style>
+        /* GLOBAL STYLES */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: "Times New Roman", Times, serif;
+            background-color: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
+            font-size: 20px;
+            padding: 15px;
+        }
+        
+        h1, h2, h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        /* NAVIGATION */
+        .nav-switch {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 25px;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .nav-btn {
+            padding: 12px 25px;
+            border: none;
+            background: #e0e6ed;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            border-radius: 8px;
+            font-size: 20px;
+            color: #2c3e50;
+        }
+        
+        .nav-btn.active {
+            background: #3498db;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
+        }
+        
+        .section {
+            display: none;
+        }
+        
+        .section.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* FORMS */
+        form {
+            margin-bottom: 25px;
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 12px;
+            margin: 5px 0 15px;
+            border: 2px solid #dfe6e9;
+            border-radius: 8px;
+            font-size: 20px;
+            font-family: "Times New Roman", Times, serif;
+            transition: border 0.3s ease;
+        }
+        
+        input:focus, select:focus {
+            border-color: #3498db;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+        
+        input[type="checkbox"] {
+            width: auto;
+            margin-right: 10px;
+            transform: scale(1.5);
+        }
+        
+        button {
+            padding: 12px 20px;
+            background: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 20px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        button:hover {
+            background: #27ae60;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(46, 204, 113, 0.3);
+        }
+        
+        button.secondary {
+            background: #3498db;
+        }
+        
+        button.secondary:hover {
+            background: #2980b9;
+        }
+        
+        button.warning {
+            background: #e74c3c;
+        }
+        
+        button.warning:hover {
+            background: #c0392b;
+        }
+        
+        button.toggle-btn {
+            background: #f39c12;
+            margin-bottom: 15px;
+        }
+        
+        button.toggle-btn:hover {
+            background: #d35400;
+        }
+        
+        /* TABLES */
+        .table-container {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #dfe6e9;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 20px;
+        }
+        
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #dfe6e9;
+        }
+        
+        th {
+            background: #3498db;
+            color: white;
+            position: sticky;
+            top: 0;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+        
+        tr:hover {
+            background-color: #ecf0f1;
+        }
+        
+        /* Status Colors */
+        .status-lunas {
+            background-color: #d5f5e3;
+            color: #27ae60;
+            font-weight: bold;
+            padding: 5px 10px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+        
+        .status-belum {
+            background-color: #fadbd8;
+            color: #e74c3c;
+            font-weight: bold;
+            padding: 5px 10px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+        
+        /* ACTION BUTTONS */
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .action-buttons button {
+            padding: 8px 12px;
+            font-size: 18px;
+        }
+        
+        /* NOTIFICATION & POPUP */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            color: white;
+            display: none;
+            z-index: 1000;
+            font-size: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .success { background: #2ecc71; }
+        .error { background: #e74c3c; }
+        
+        .popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            display: none;
+            z-index: 1000;
+            max-width: 90%;
+            max-height: 80vh;
+            overflow: auto;
+            font-size: 20px;
+        }
+        
+        .popup-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 40px;
+            color: #e74c3c;
+        }
+        
+        .popup-close:hover {
+            color: #e74c3c;
+        }
+        
+        /* BACKUP SECTION */
+        .backup-section {
+            margin-top: 30px;
+            border-top: 2px solid #dfe6e9;
+            padding-top: 25px;
+        }
+        
+        .backup-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        
+        .storage-info {
+            margin-top: 20px;
+        }
+        
+        .storage-bar {
+            height: 25px;
+            background: #dfe6e9;
+            border-radius: 12px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+        
+        .storage-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3498db, #2ecc71);
+            border-radius: 12px;
+            transition: width 0.5s ease;
+            position: relative;
+        }
+        
+        .storage-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, 
+                          rgba(255,255,255,0.1) 0%, 
+                          rgba(255,255,255,0.3) 50%, 
+                          rgba(255,255,255,0.1) 100%);
+            background-size: 200% 100%;
+            animation: shimmer 2s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        
+        /* DATALIST */
+        datalist {
+            font-family: "Times New Roman", Times, serif;
+            font-size: 20px;
+        }
+        
+        /* RESPONSIVE ADJUSTMENTS */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .nav-btn {
+                padding: 12px 15px;
+                font-size: 18px;
+            }
+            
+            form {
+                padding: 15px;
+            }
+            
+            th, td {
+                padding: 12px 8px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                gap: 5px;
+            }
+            
+            .backup-buttons {
+                flex-direction: column;
+            }
+            
+            button {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+        }
+        
+        /* PRINT STYLES */
+        @media print {
+            body {
+                background: white;
+                font-size: 16px;
+            }
+            
+            .container {
+                box-shadow: none;
+                padding: 0;
+            }
+            
+            .nav-switch, .toggle-btn, .backup-section {
+                display: none;
+            }
+            
+            .table-container {
+                max-height: none;
+                overflow: visible;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="nav-switch">
+            <button class="nav-btn active" onclick="switchSection('tabungan')">Tabungan</button>
+            <button class="nav-btn" onclick="switchSection('hutang')">Hutang</button>
+        </div>
+
+        <div id="tabungan" class="section active">
+            <h2>Form Tabungan 📑</h2>
+            <form id="tabunganForm">
+                <div class="form-group">
+                    <label for="namaTabung"> 🪪 Nama:</label>
+                    <input type="text" id="namaTabung" placeholder="Nama Penabung" required>
+                </div>
+                <div class="form-group">
+                    <label for="tanggalTabung"> 🗓️ Tanggal:</label>
+                    <input type="date" id="tanggalTabung" required>
+                </div>
+                <div class="form-group">
+                    <label for="jumlahTabung"> 💵 Jumlah (Rp):</label>
+                    <input type="text" id="jumlahTabung" placeholder="Jumlah Nabung" oninput="formatRupiah(this)" required>
+                </div>
+                <button type="submit">Simpan Tabungan ⬇️</button>
+            </form>
+
+            <h2>Form Pengambilan Uang (Bon) 💲</h2>
+            <form id="bonForm">
+                <div class="form-group">
+                    <label for="namaBon"> 🪪 Nama:</label>
+                    <input list="namaListTabung" id="namaBon" placeholder="Nama Penabung" required>
+                    <datalist id="namaListTabung"></datalist>
+                </div>
+                <div class="form-group">
+                    <label for="tanggalBon"> 🗓️ Tanggal:</label>
+                    <input type="date" id="tanggalBon" required>
+                </div>
+                <div class="form-group">
+                    <label for="jumlahBon"> 💲 Jumlah Ambil (Rp):</label>
+                    <input type="text" id="jumlahBon" placeholder="Jumlah Ambil" oninput="formatRupiah(this); calculateAdmin()" required>
+                </div>
+                <div class="form-group">
+                    <label for="adminBon"> 💰 Biaya Admin (Rp):</label>
+                    <input type="text" id="adminBon" placeholder="Biaya Admin" readonly>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="potongAdmin"> Potong Admin dari Tabungan
+                    </label>
+                </div>
+                <button type="submit">Ambil Uang 💰</button>
+            </form>
+
+            <div class="form-group">
+                <label for="searchTabung"> 🔍 Cari Nama Penabung:</label>
+                <input type="text" id="searchTabung" placeholder="Cari..." oninput="searchTabungan()">
+            </div>
+            
+            <button class="toggle-btn" onclick="toggleTable('tabunganTableContainer')">
+                <span id="tabunganToggleText">Sembunyikan 👁️</span> Tabel
+            </button>
+            
+            <div id="tabunganTableContainer" class="table-container">
+                <table id="tabunganTable">
+                    <thead>
+                        <tr>
+                            <th>Nama</th>
+                            <th>Tanggal</th>
+                            <th>Total Nabung</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="hutang" class="section">
+            <h2>Form Hutang 🏦</h2>
+            <form id="hutangForm">
+                <div class="form-group">
+                    <label for="namaHutang"> 🪪 Nama:</label>
+                    <input type="text" id="namaHutang" placeholder="Nama Peminjam" required>
+                </div>
+                <div class="form-group">
+                    <label for="tanggalHutang"> 🗓️ Tanggal:</label>
+                    <input type="date" id="tanggalHutang" required>
+                </div>
+                <div class="form-group">
+                    <label for="jumlahHutang"> 💵 Jumlah (Rp):</label>
+                    <input type="text" id="jumlahHutang" placeholder="Jumlah Hutang" oninput="formatRupiah(this); calculateBunga()" required>
+                </div>
+                <div class="form-group">
+                    <label for="keteranganHutang"> ✍️ Keterangan:</label>
+                    <input type="text" id="keteranganHutang" placeholder="Keterangan (Opsional)">
+                </div>
+                <div class="form-group">
+                    <label for="jenisHutang"> 💲 Jenis Hutang:</label>
+                    <select id="jenisHutang" onchange="calculateBunga()" required>
+                        <option value=""> 💰 Pilih Jenis Hutang</option>
+                        <option value="harian">Harian</option>
+                        <option value="mingguan">Mingguan</option>
+                        <option value="bulanan">Bulanan</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="totalHutangBunga"> 💵 Total Hutang + Bunga (Rp):</label>
+                    <input type="text" id="totalHutangBunga" placeholder="Total" readonly>
+                </div>
+                <button type="submit">Simpan Hutang 💳</button>
+            </form>
+
+            <h2>Form Pembayaran Hutang 🪙</h2>
+            <form id="bayarHutangForm">
+                <div class="form-group">
+                    <label for="namaBayar"> 🪪 Nama:</label>
+                    <input list="namaListHutang" id="namaBayar" placeholder="Nama Peminjam" required onchange="checkJenisHutang()">
+                    <datalist id="namaListHutang"></datalist>
+                </div>
+                <div class="form-group">
+                    <label for="tanggalBayar"> 🗓️ Tanggal:</label>
+                    <input type="date" id="tanggalBayar" required>
+                </div>
+                <div class="form-group">
+                    <label for="jumlahBayar"> 💲 Jumlah Bayar (Rp):</label>
+                    <input type="text" id="jumlahBayar" placeholder="Jumlah Pembayaran" oninput="formatRupiah(this)" required>
+                </div>
+                <div class="form-group">
+                    <label for="keteranganBayar"> ✍️ Keterangan:</label>
+                    <input type="text" id="keteranganBayar" placeholder="Keterangan (Opsional)">
+                </div>
+                <div class="form-group" id="jenisBayarContainer">
+                    <label for="jenisBayar"> 💲 Jenis Pembayaran:</label>
+                    <select id="jenisBayar" required>
+                        <option value="">Pilih Jenis Pembayaran</option>
+                        <option value="pokok">Pokok Saja</option>
+                        <option value="bunga">Bunga Saja</option>
+                        <option value="campuran">Campuran</option>
+                    </select>
+                </div>
+                <button type="submit">Bayar Hutang 🫴</button>
+            </form>
+
+            <div class="form-group">
+                <label for="searchHutang"> 🔍 Cari Nama Hutang:</label>
+                <input type="text" id="searchHutang" placeholder="Cari..." oninput="searchHutang()">
+            </div>
+            
+            <button class="toggle-btn" onclick="toggleTable('hutangTableContainer')">
+                <span id="hutangToggleText">Sembunyikan 👁️ </span> Tabel
+            </button>
+            
+            <div id="hutangTableContainer" class="table-container">
+                <table id="hutangTable">
+                    <thead>
+                        <tr>
+                            <th>Nama</th>
+                            <th>Tanggal</th>
+                            <th>Jumlah Hutang</th>
+                            <th>Bunga</th>
+                            <th>Jenis</th>
+                            <th>Status</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="backup-section">
+            <h2>Fitur Backup 📁 & Restore ♻️</h2>
+            <div class="backup-buttons">
+                <button class="secondary" onclick="backupData('json')">Backup JSON 💾</button>
+                <button class="secondary" onclick="backupData('csv')">Backup CSV 📊</button>
+                <button class="secondary" onclick="backupData('txt')">Backup TXT 📝</button>
+            </div>
+            
+            <div class="form-group">
+                <label for="restoreFile"> ♻️ Restore Data:</label>
+                <input type="file" id="restoreFile" accept=".json">
+                <button class="secondary" onclick="restoreData()"> 💾 Restore JSON</button>
+            </div>
+            
+            <div class="storage-info">
+                <p id="lastBackup"> 📆 Terakhir Backup: Belum Pernah</p>
+                <p id="storageInfo"> 🗃️ Penggunaan Storage: 0 / 50 MB</p>
+                <div class="storage-bar">
+                    <div id="storageFill" class="storage-fill" style="width: 0%;"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="notification" class="notification"></div>
+        <div id="popup" class="popup">
+            <span class="popup-close" onclick="closePopup()">×</span>
+            <div id="popupContent"></div>
+        </div>
+    </div>
+
+    <script>
+        let db;
+        const dbName = "finAppDB";
+        const dbVersion = 1;
+        const limitMB = 50;
+        const reminderDays = 7;
+
+        function initDB() {
+            const request = indexedDB.open(dbName, dbVersion);
+            request.onupgradeneeded = (e) => {
+                db = e.target.result;
+                db.createObjectStore('tabungan', { keyPath: 'id', autoIncrement: true });
+                db.createObjectStore('riwayatTabungan', { keyPath: 'id', autoIncrement: true });
+                db.createObjectStore('hutang', { keyPath: 'id', autoIncrement: true });
+                db.createObjectStore('riwayatHutang', { keyPath: 'id', autoIncrement: true });
+                db.createObjectStore('settings', { keyPath: 'key' });
+            };
+            request.onsuccess = (e) => {
+                db = e.target.result;
+                loadTabungan();
+                loadHutang();
+                populateDatalists();
+                checkBackupReminder();
+                updateStorageUsage();
+                updateLastBackup();
+            };
+            request.onerror = () => showNotification('Error membuka database', 'error');
+        }
+
+        function formatRupiah(input) {
+            let value = input.value.replace(/\D/g, '');
+            if (value === '') {
+                input.value = '';
+                return;
+            }
+            let number = parseInt(value, 10);
+            if (isNaN(number)) {
+                input.value = '';
+                return;
+            }
+            input.value = number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        }
+
+        function parseRupiah(str) {
+            return parseInt(str.replace(/\./g, '')) || 0;
+        }
+
+        function switchSection(section) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById(section).classList.add('active');
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        function toggleTable(id) {
+            const container = document.getElementById(id);
+            container.style.display = container.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function showNotification(message, type) {
+            const notif = document.getElementById('notification');
+            notif.textContent = message;
+            notif.className = `notification ${type}`;
+            notif.style.display = 'block';
+            setTimeout(() => notif.style.display = 'none', 5000);
+        }
+
+        function openPopup(content) {
+            document.getElementById('popupContent').innerHTML = content;
+            document.getElementById('popup').style.display = 'block';
+        }
+
+        function closePopup() {
+            document.getElementById('popup').style.display = 'none';
+        }
+
+        // Tabungan Functions
+        document.getElementById('tabunganForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const nama = document.getElementById('namaTabung').value;
+            const tanggal = document.getElementById('tanggalTabung').value;
+            const jumlah = parseRupiah(document.getElementById('jumlahTabung').value);
+            saveTabungan({ nama, tanggal, jumlah, type: 'setoran' });
+        });
+
+        function saveTabungan(data) {
+            const tx = db.transaction('riwayatTabungan', 'readwrite');
+            const store = tx.objectStore('riwayatTabungan');
+            store.add(data);
+            tx.oncomplete = () => {
+                showNotification('Tabungan disimpan', 'success');
+                loadTabungan();
+                populateDatalists();
+                document.getElementById('tabunganForm').reset();
+            };
+            tx.onerror = () => showNotification('Error simpan tabungan', 'error');
+        }
+
+        function loadTabungan(search = '') {
+            const tx = db.transaction('riwayatTabungan');
+            const store = tx.objectStore('riwayatTabungan');
+            const request = store.getAll();
+            request.onsuccess = () => {
+                const data = request.result;
+                const grouped = data.reduce((acc, item) => {
+                    if (!acc[item.nama]) acc[item.nama] = { total: 0, tanggal: item.tanggal, riwayat: [] };
+                    acc[item.nama].riwayat.push(item);
+                    const factor = item.type === 'setoran' ? 1 : -1;
+                    acc[item.nama].total += factor * item.jumlah;
+                    if (item.admin && item.potongAdmin) acc[item.nama].total -= item.admin;
+                    return acc;
+                }, {});
+                const tbody = document.querySelector('#tabunganTable tbody');
+                tbody.innerHTML = '';
+                Object.entries(grouped).forEach(([nama, info]) => {
+                    if (search && !nama.toLowerCase().includes(search.toLowerCase())) return;
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${nama}</td>
+                        <td>${info.tanggal}</td>
+                        <td>${new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(info.total)}</td>
+                        <td>
+                            <button onclick="deleteTabungan('${nama}')">Hapus</button>
+                            <button onclick="showRiwayatTabungan('${nama}')">Riwayat</button>
+                            <button onclick="exportRiwayatTabungan('${nama}')">Export WA</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            };
+        }
+
+        function searchTabungan() {
+            const search = document.getElementById('searchTabung').value;
+            loadTabungan(search);
+        }
+
+        function showRiwayatTabungan(nama) {
+            const tx = db.transaction('riwayatTabungan');
+            const store = tx.objectStore('riwayatTabungan');
+            const request = store.getAll();
+            request.onsuccess = () => {
+                const riwayat = request.result.filter(item => item.nama === nama).sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal));
+                let content = `<h3>Riwayat Tabungan ${nama}</h3><table><thead><tr><th>Tanggal</th><th>Jumlah</th><th>Keterangan</th><th>Admin</th><th>Sisa Saldo</th></tr></thead><tbody>`;
+                let sisaSaldo = 0;
+                riwayat.forEach(item => {
+                    const factor = item.type === 'setoran' ? 1 : -1;
+                    sisaSaldo += factor * item.jumlah;
+                    let adminKeterangan = '';
+                    if (item.admin && item.potongAdmin) {
+                        sisaSaldo -= item.admin;
+                        adminKeterangan = `Potong admin: ${new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(item.admin)}`;
+                    }
+                    content += `<tr><td>${item.tanggal}</td><td>${new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(item.jumlah)}</td><td>${item.type}</td><td>${adminKeterangan}</td><td>${new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(sisaSaldo)}</td></tr>`;
+                });
+                content += '</tbody></table><button onclick="exportRiwayatTabungan(\'' + nama + '\')">Export ke WA</button>';
+                openPopup(content);
+            };
+        }
+
+        function deleteTabungan(nama) {
+            if (!confirm('Yakin hapus tabungan ' + nama + '?')) return;
+            const tx = db.transaction('riwayatTabungan', 'readwrite');
+            const store = tx.objectStore('riwayatTabungan');
+            const request = store.getAll();
+            request.onsuccess = () => {
+                request.result.filter(item => item.nama === nama).forEach(item => store.delete(item.id));
+                tx.oncomplete = () => loadTabungan();
+            };
+        }
+
+        function exportRiwayatTabungan(nama) {
+          const tx = db.transaction('riwayatTabungan');
+          const store = tx.objectStore('riwayatTabungan');
+          const request = store.getAll();
+          request.onsuccess = () => {
+              const riwayat = request.result.filter(item => item.nama === nama).sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal));
+              let text = `Riwayat Tabungan ${nama}:\n`;
+              let sisaSaldo = 0;
+              riwayat.forEach(item => {
+                  const factor = item.type === 'setoran' ? 1 : -1;
+                  sisaSaldo += factor * item.jumlah;
+                  let adminKeterangan = '';
+                  if (item.admin && item.potongAdmin) {
+                      sisaSaldo -= item.admin;
+                      adminKeterangan = ` (Potong admin: ${new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(item.admin)})`;
+                  }
+                  text += `• ${item.tanggal} - ${item.type}: ${new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(item.jumlah)}${adminKeterangan} | Sisa Saldo: ${new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(sisaSaldo)}\n`;
+              });
+              const waUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
+              window.open(waUrl, '_blank');
+          };
+      }
+
+        // Bon Functions
+        document.getElementById('bonForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const nama = document.getElementById('namaBon').value;
+            const tanggal = document.getElementById('tanggalBon').value;
+            const jumlah = parseRupiah(document.getElementById('jumlahBon').value);
+            const admin = parseRupiah(document.getElementById('adminBon').value);
+            const potongAdmin = document.getElementById('potongAdmin').checked;
+            saveTabungan({ nama, tanggal, jumlah, admin, potongAdmin, type: 'pengambilan' });
+        });
+
+        function calculateAdmin() {
+            const jumlah = parseRupiah(document.getElementById('jumlahBon').value);
+            const admin = Math.ceil(jumlah / 100000) * 5000;
+            document.getElementById('adminBon').value = admin.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        }
+
+        // Hutang Functions
+        document.getElementById('hutangForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const nama = document.getElementById('namaHutang').value;
+            const tanggal = document.getElementById('tanggalHutang').value;
+            const jumlah = parseRupiah(document.getElementById('jumlahHutang').value);
+            const keterangan = document.getElementById('keteranganHutang').value;
+            const jenis = document.getElementById('jenisHutang').value;
+            const totalBunga = parseRupiah(document.getElementById('totalHutangBunga').value);
+            const bunga = totalBunga - jumlah;
+            saveHutang({ nama, tanggal, jumlah, bunga, total: totalBunga, keterangan, jenis, status: 'belum lunas', pokokSisa: jumlah, bungaSisa: bunga });
+        });
+
+        function calculateBunga() {
+            const jumlah = parseRupiah(document.getElementById('jumlahHutang').value);
+            const jenis = document.getElementById('jenisHutang').value;
+            let bunga = 0;
+            if (jenis === 'harian' || jenis === 'mingguan') {
+                bunga = (jumlah / 100000) * 50000;
+            } else if (jenis === 'bulanan') {
+                bunga = (jumlah / 1000000) * 100000;
+            }
+            const total = jumlah + bunga;
+            document.getElementById('totalHutangBunga').value = total.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        }
+
+        function saveHutang(data) {
+            const tx = db.transaction(['hutang', 'riwayatHutang'], 'readwrite');
+            const hutangStore = tx.objectStore('hutang');
+            const riwayatStore = tx.objectStore('riwayatHutang');
+            hutangStore.add(data);
+            riwayatStore.add({ ...data, type: 'hutang' });
+            tx.oncomplete = () => {
+                showNotification('Hutang disimpan', 'success');
+                loadHutang();
+                populateDatalists();
+                document.getElementById('hutangForm').reset();
+                document.getElementById('totalHutangBunga').value = '';
+            };
+            tx.onerror = () => showNotification('Error simpan hutang', 'error');
+        }
+
+        function loadHutang(search = '') {
+            const tx = db.transaction('hutang');
+            const store = tx.objectStore('hutang');
+            const request = store.getAll();
+            request.onsuccess = () => {
+                const tbody = document.querySelector('#hutangTable tbody');
+                tbody.innerHTML = '';
+                request.result.forEach(item => {
+                    if (search && !item.nama.toLowerCase().includes(search.toLowerCase())) return;
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${item.nama}</td>
+                        <td>${item.tanggal}</td>
+                        <td>${new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(item.jumlah)}</td>
+                        <td>${new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(item.bunga)}</td>
+                        <td>${item.jenis}</td>
+                        <td>${item.status}</td>
+                        <td>
+                            ${item.status === 'lunas' ? `<button onclick="deleteHutang(${item.id})">Hapus</button>` : ''}
+                            <button onclick="showRiwayatHutang(${item.id})">Riwayat</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            };
+        }
+
+        function searchHutang() {
+            const search = document.getElementById('searchHutang').value;
+            loadHutang(search);
+        }
+
+        function deleteHutang(id) {
+            if (!confirm('Yakin hapus hutang?')) return;
+            const tx = db.transaction(['hutang', 'riwayatHutang'], 'readwrite');
+            const hutangStore = tx.objectStore('hutang');
+            const riwayatStore = tx.objectStore('riwayatHutang');
+            hutangStore.delete(id);
+            const request = riwayatStore.getAll();
+            request.onsuccess = () => {
+                request.result.filter(item => item.id === id).forEach(item => riwayatStore.delete(item.id));
+                tx.oncomplete = () => loadHutang();
+            };
+        }
+
+        function showRiwayatHutang(id) {
+            const tx = db.transaction(['hutang', 'riwayatHutang']);
+            const hutangStore = tx.objectStore('hutang');
+            const riwayatStore = tx.objectStore('riwayatHutang');
+            const hutangReq = hutangStore.get(id);
+            hutangReq.onsuccess = () => {
+                const hutang = hutangReq.result;
+                const riwayatReq = riwayatStore.getAll();
+                riwayatReq.onsuccess = () => {
+                    const riwayat = riwayatReq.result.filter(item => item.nama === hutang.nama);
+                    let content = `<h3>Riwayat Hutang ${hutang.nama}</h3>
+                        <p>Jenis: ${hutang.jenis}</p>
+                        <p>Total Hutang: ${new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(hutang.total)}</p>`;
+                    if (hutang.jenis === 'bulanan') {
+                        content += `<p>Pokok: ${new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(hutang.pokokSisa)}</p>
+                            <p>Bunga: ${new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(hutang.bungaSisa)}</p>`;
+                    } else {
+                        content += `<p>Sisa Hutang: ${new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(hutang.pokokSisa + hutang.bungaSisa)}</p>`;
+                    }
+                    content += `<p>Status: ${hutang.status}</p>
+                        <table><thead><tr><th>Tanggal</th><th>Jumlah</th><th>Keterangan</th></tr></thead><tbody>`;
+                    riwayat.forEach(item => {
+                        if (item.type === 'hutang') return;
+                        content += `<tr><td>${item.tanggal}</td><td>${new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(item.jumlah)}</td><td>${item.jenisBayar || ''}</td></tr>`;
+                    });
+                    content += '</tbody></table><button onclick="exportRiwayatHutang(' + id + ')">Export ke WA</button>';
+                    openPopup(content);
+                };
+            };
+        }
+
+        function exportRiwayatHutang(id) {
+          const tx = db.transaction(['hutang', 'riwayatHutang']);
+          const hutangStore = tx.objectStore('hutang');
+          const riwayatStore = tx.objectStore('riwayatHutang');
+          const hutangReq = hutangStore.get(id);
+          hutangReq.onsuccess = () => {
+              const hutang = hutangReq.result;
+              const riwayatReq = riwayatStore.getAll();
+              riwayatReq.onsuccess = () => {
+                  const riwayat = riwayatReq.result.filter(item => item.nama === hutang.nama);
+                  let text = `Riwayat Hutang ${hutang.nama}:\n• Jenis: ${hutang.jenis}\n• Total: ${new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(hutang.total)}\n`;
+                  if (hutang.jenis === 'bulanan') {
+                      text += `• Pokok Sisa: ${new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(hutang.pokokSisa)}\n• Bunga Sisa: ${new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(hutang.bungaSisa)}\n`;
+                  } else {
+                      text += `• Sisa Hutang: ${new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(hutang.pokokSisa + hutang.bungaSisa)}\n`;
+                  }
+                  text += `• Status: ${hutang.status}\nRiwayat Pembayaran:\n`;
+                  riwayat.forEach(item => {
+                      if (item.type === 'hutang') return;
+                      text += `• ${item.tanggal} - ${item.jenisBayar || 'Pembayaran'}: ${new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(item.jumlah)}\n`;
+                  });
+                  const waUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
+                  window.open(waUrl, '_blank');
+              };
+          };
+      }
+
+        // Pembayaran Hutang
+        document.getElementById('bayarHutangForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const nama = document.getElementById('namaBayar').value;
+            const tanggal = document.getElementById('tanggalBayar').value;
+            const jumlah = parseRupiah(document.getElementById('jumlahBayar').value);
+            const keterangan = document.getElementById('keteranganBayar').value;
+            const jenisBayar = document.getElementById('jenisBayar').value;
+            const tx = db.transaction(['hutang', 'riwayatHutang'], 'readwrite');
+            const hutangStore = tx.objectStore('hutang');
+            const riwayatStore = tx.objectStore('riwayatHutang');
+            const request = hutangStore.getAll();
+            request.onsuccess = () => {
+                const hutang = request.result.find(item => item.nama === nama);
+                if (!hutang) return showNotification('Data hutang tidak ditemukan', 'error');
+                let pokokReduce = 0;
+                let bungaReduce = 0;
+                if (hutang.jenis !== 'bulanan') {
+                    const sisa = hutang.pokokSisa + hutang.bungaSisa - jumlah;
+                    if (sisa <= 0) hutang.status = 'lunas';
+                    hutang.pokokSisa = sisa > 0 ? sisa : 0;
+                    hutang.bungaSisa = 0;
+                } else {
+                    if (jenisBayar === 'pokok') pokokReduce = jumlah;
+                    else if (jenisBayar === 'bunga') bungaReduce = jumlah;
+                    else {
+                        if (hutang.bungaSisa > 0) {
+                            bungaReduce = Math.min(jumlah, hutang.bungaSisa);
+                            pokokReduce = jumlah - bungaReduce;
+                        } else {
+                            pokokReduce = jumlah;
+                        }
+                    }
+                    hutang.pokokSisa -= pokokReduce;
+                    hutang.bungaSisa -= bungaReduce;
+                    if (hutang.pokokSisa <= 0 && hutang.bungaSisa <= 0) hutang.status = 'lunas';
+                }
+                hutangStore.put(hutang);
+                riwayatStore.add({ nama, tanggal, jumlah, keterangan, jenisBayar, type: 'bayar' });
+                tx.oncomplete = () => {
+                    showNotification('Pembayaran disimpan', 'success');
+                    loadHutang();
+                    document.getElementById('bayarHutangForm').reset();
+                    checkJenisHutang();
+                };
+            };
+        });
+
+        function checkJenisHutang() {
+            const nama = document.getElementById('namaBayar').value;
+            if (!nama) return;
+            const tx = db.transaction('hutang');
+            const store = tx.objectStore('hutang');
+            const request = store.getAll();
+            request.onsuccess = () => {
+                const hutang = request.result.find(item => item.nama === nama);
+                if (hutang) {
+                    const select = document.getElementById('jenisBayar');
+                    if (hutang.jenis !== 'bulanan') {
+                        select.style.display = 'none';
+                        select.value = 'campuran';
+                    } else {
+                        select.style.display = 'block';
+                    }
+                }
+            };
+        }
+
+        function populateDatalists() {
+            const tx = db.transaction(['riwayatTabungan', 'hutang']);
+            const tabungStore = tx.objectStore('riwayatTabungan');
+            const hutangStore = tx.objectStore('hutang');
+            tabungStore.getAll().onsuccess = (e) => {
+                const names = [...new Set(e.target.result.map(item => item.nama))];
+                const datalist = document.getElementById('namaListTabung');
+                datalist.innerHTML = names.map(name => `<option value="${name}">`).join('');
+            };
+            hutangStore.getAll().onsuccess = (e) => {
+                const names = [...new Set(e.target.result.map(item => item.nama))];
+                const datalist = document.getElementById('namaListHutang');
+                datalist.innerHTML = names.map(name => `<option value="${name}">`).join('');
+            };
+        }
+
+        // Backup & Restore
+        async function backupData(format) {
+            const tx = db.transaction(['riwayatTabungan', 'hutang', 'riwayatHutang'], 'readonly');
+            const data = {};
+            for (let storeName of ['riwayatTabungan', 'hutang', 'riwayatHutang']) {
+                data[storeName] = await new Promise(resolve => {
+                    tx.objectStore(storeName).getAll().onsuccess = e => resolve(e.target.result);
+                });
+            }
+            let content;
+            let type;
+            let ext;
+            if (format === 'json') {
+                content = JSON.stringify(data);
+                type = 'application/json';
+                ext = 'json';
+            } else if (format === 'csv') {
+                content = Object.entries(data).map(([key, val]) => `${key}\n` + val.map(obj => Object.values(obj).join(',')).join('\n')).join('\n\n');
+                type = 'text/csv';
+                ext = 'csv';
+            } else if (format === 'txt') {
+                content = JSON.stringify(data, null, 2);
+                type = 'text/plain';
+                ext = 'txt';
+            }
+            const blob = new Blob([content], { type });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `backup.${ext}`;
+            a.click();
+            saveLastBackup();
+        }
+
+        function restoreData() {
+            const file = document.getElementById('restoreFile').files[0];
+            if (!file) return showNotification('Pilih file JSON', 'error');
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    const tx = db.transaction(['riwayatTabungan', 'hutang', 'riwayatHutang'], 'readwrite');
+                    for (let storeName in data) {
+                        const store = tx.objectStore(storeName);
+                        store.clear();
+                        data[storeName].forEach(item => store.add(item));
+                    }
+                    tx.oncomplete = () => {
+                        showNotification('Data direstore', 'success');
+                        loadTabungan();
+                        loadHutang();
+                        populateDatalists();
+                    };
+                } catch (err) {
+                    showNotification('Error restore data', 'error');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function saveLastBackup() {
+            const now = new Date().toLocaleString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            const tx = db.transaction('settings', 'readwrite');
+            tx.objectStore('settings').put({ key: 'lastBackup', value: now });
+            updateLastBackup();
+        }
+
+        function updateLastBackup() {
+            const tx = db.transaction('settings');
+            tx.objectStore('settings').get('lastBackup').onsuccess = (e) => {
+                document.getElementById('lastBackup').textContent = `Terakhir Backup: ${e.target.result ? e.target.result.value : 'Belum Pernah'}`;
+            };
+        }
+
+        function checkBackupReminder() {
+            const tx = db.transaction('settings');
+            tx.objectStore('settings').get('lastBackup').onsuccess = (e) => {
+                const last = e.target.result ? new Date(e.target.result.value) : null;
+                if (!last || (Date.now() - last.getTime()) / (1000 * 60 * 60 * 24) >= reminderDays) {
+                    if (confirm('Waktunya backup! Sudah 7 hari atau belum pernah backup. OK untuk backup via WA?')) {
+                        const waNumber = '6281234567890';
+                        const text = 'Backup data aplikasi: ' + encodeURIComponent(JSON.stringify({ /* data */ }));
+                        window.open(`https://wa.me/${waNumber}?text=${text}`, '_blank');
+                        saveLastBackup();
+                    }
+                }
+            };
+        }
+
+        async function updateStorageUsage() {
+          if (navigator.storage && navigator.storage.estimate) {
+              const estimate = await navigator.storage.estimate();
+              const usedBytes = estimate.usage;
+              let used, unit;
+              
+              // Konversi ke KB atau MB berdasarkan ukuran
+              if (usedBytes < 1024 * 1024) {
+                  // Kurang dari 1 MB, gunakan KB
+                  used = usedBytes / 1024;
+                  unit = 'KB';
+                  used = used.toFixed(2); // 2 desimal untuk KB
+              } else {
+                  // 1 MB atau lebih, gunakan MB
+                  used = usedBytes / (1024 * 1024);
+                  unit = 'MB';
+                  used = used.toFixed(2); // 2 desimal untuk MB
+              }
+      
+              const percent = (usedBytes / (limitMB * 1024 * 1024)) * 100;
+              document.getElementById('storageFill').style.width = `${percent}%`;
+              document.getElementById('storageInfo').textContent = `Penggunaan Storage: ${used} ${unit} / 50 MB`;
+          }
+      }
+
+        initDB();
+    </script>
+<script>
+  // Register Service Worker
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js')
+        .then(registration => {
+          console.log('ServiceWorker registration successful');
+        })
+        .catch(err => {
+          console.log('ServiceWorker registration failed: ', err);
+        });
+    });
+  }
+
+  // Prompt install PWA
+  let deferredPrompt;
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    
+    // Tampilkan button install
+    const installButton = document.createElement('button');
+    installButton.textContent = 'Install Aplikasi';
+    installButton.style.cssText = `
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      padding: 12px 20px;
+      background: #2ecc71;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 20px;
+      z-index: 9999;
+    `;
+    installButton.onclick = () => {
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then(choiceResult => {
+        if (choiceResult.outcome === 'accepted') {
+          console.log('User accepted install prompt');
+        }
+        deferredPrompt = null;
+      });
+    };
+    document.body.appendChild(installButton);
+  });
+</script>
+</body>
+</html>
