@@ -1135,9 +1135,9 @@
             tx.objectStore('settings').get('lastBackup').onsuccess = (e) => {
                 const last = e.target.result ? new Date(e.target.result.value) : null;
                 if (!last || (Date.now() - last.getTime()) / (1000 * 60 * 60 * 24) >= reminderDays) {
-                    if (confirm('Waktunya backup! Sudah 7 hari atau belum pernah backup. OK untuk backup via WA?')) {
+                    if (confirm('Waktunya backup! Sudah 7 hari. klik  "OK" untuk backup via WA?')) {
                         const waNumber = '6289661006297';
-                        const text = 'Backup data aplikasi: ' + encodeURIComponent(JSON.stringify({ /* data */ }));
+                        const text = 'Nang, Waktu e Backup data aplikasi Catatan';
                         window.open(`https://wa.me/${waNumber}?text=${text}`, '_blank');
                         saveLastBackup();
                     }
