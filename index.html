@@ -706,9 +706,10 @@
             const store = tx.objectStore('riwayatTabungan');
             store.add(data);
             tx.oncomplete = () => {
-                showNotification('Tabungan disimpan', 'success');
+                showNotification('Tabungan berhasil disimpan', 'success');
                 loadTabungan();
                 populateDatalists();
+                updateStorageUsage();
                 document.getElementById('tabunganForm').reset();
             };
             tx.onerror = () => showNotification('Error simpan tabungan', 'error');
@@ -860,9 +861,10 @@
             hutangStore.add(data);
             riwayatStore.add({ ...data, type: 'hutang' });
             tx.oncomplete = () => {
-                showNotification('Hutang disimpan', 'success');
+                showNotification('Hutang berhasil disimpan', 'success');
                 loadHutang();
                 populateDatalists();
+                updateStorageUsage();
                 document.getElementById('hutangForm').reset();
                 document.getElementById('totalHutangBunga').value = '';
             };
@@ -1012,7 +1014,7 @@
                 hutangStore.put(hutang);
                 riwayatStore.add({ nama, tanggal, jumlah, keterangan, jenisBayar, type: 'bayar' });
                 tx.oncomplete = () => {
-                    showNotification('Pembayaran disimpan', 'success');
+                    showNotification('Pembayaran berhasil disimpan', 'success');
                     loadHutang();
                     document.getElementById('bayarHutangForm').reset();
                     checkJenisHutang();
@@ -1104,7 +1106,7 @@
                         data[storeName].forEach(item => store.add(item));
                     }
                     tx.oncomplete = () => {
-                        showNotification('Data direstore', 'success');
+                        showNotification('Data berhasil direstore', 'success');
                         loadTabungan();
                         loadHutang();
                         populateDatalists();
