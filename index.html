@@ -820,6 +820,7 @@
             const admin = parseRupiah(document.getElementById('adminBon').value);
             const potongAdmin = document.getElementById('potongAdmin').checked;
             saveTabungan({ nama, tanggal, jumlah, admin, potongAdmin, type: 'pengambilan' });
+            location.reload();
         });
 
         function calculateAdmin() {
