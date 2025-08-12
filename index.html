@@ -1146,29 +1146,50 @@
         }
 
         async function updateStorageUsage() {
-          if (navigator.storage && navigator.storage.estimate) {
-              const estimate = await navigator.storage.estimate();
-              const usedBytes = estimate.usage;
-              let used, unit;
-              
-              // Konversi ke KB atau MB berdasarkan ukuran
-              if (usedBytes < 1024 * 1024) {
-                  // Kurang dari 1 MB, gunakan KB
-                  used = usedBytes / 1024;
-                  unit = 'KB';
-                  used = used.toFixed(2); // 2 desimal untuk KB
-              } else {
-                  // 1 MB atau lebih, gunakan MB
-                  used = usedBytes / (1024 * 1024);
-                  unit = 'MB';
-                  used = used.toFixed(2); // 2 desimal untuk MB
-              }
-      
-              const percent = (usedBytes / (limitMB * 1024 * 1024)) * 100;
-              document.getElementById('storageFill').style.width = `${percent}%`;
-              document.getElementById('storageInfo').textContent = `Penggunaan Storage: ${used} ${unit} / 50 MB`;
-          }
-      }
+    try {
+        // Hitung ukuran storage manual dari data IndexedDB
+        const tx = db.transaction(['riwayatTabungan', 'hutang', 'riwayatHutang'], 'readonly');
+        let totalSize = 0;
+        
+        // Hitung ukuran masing-masing store
+        for (const storeName of ['riwayatTabungan', 'hutang', 'riwayatHutang']) {
+            const data = await new Promise(resolve => {
+                tx.objectStore(storeName).getAll().onsuccess = e => resolve(e.target.result);
+            });
+            totalSize += JSON.stringify(data).length;
+        }
+        
+        // Format tampilan berdasarkan ukuran
+        let displaySize, displayUnit;
+        if (totalSize < 1024 * 1024) { // Kurang dari 1 MB
+            displaySize = totalSize / 1024; // Convert ke KB
+            displayUnit = 'KB';
+            displaySize = displaySize.toFixed(2); // 2 angka dibelakang koma untuk KB
+        } else {
+            displaySize = totalSize / (1024 * 1024); // Convert ke MB
+            displayUnit = 'MB';
+            displaySize = displaySize.toFixed(2); // 2 angka dibelakang koma untuk MB
+        }
+        
+        // Update tampilan
+        const percent = Math.min((totalSize / (limitMB * 1024 * 1024)) * 100, 100);
+        document.getElementById('storageFill').style.width = `${percent}%`;
+        document.getElementById('storageInfo').textContent = 
+            `🗃️ Penggunaan Storage: ${displaySize} ${displayUnit} / 50 MB`;
+            
+    } catch (error) {
+        console.error("Error calculating storage usage:", error);
+        // Fallback ke estimasi browser jika error
+        if (navigator.storage && navigator.storage.estimate) {
+            const estimate = await navigator.storage.estimate();
+            const usedMB = estimate.usage / (1024 * 1024);
+            const percent = (usedMB / limitMB) * 100;
+            document.getElementById('storageFill').style.width = `${percent}%`;
+            document.getElementById('storageInfo').textContent = 
+                `🗃️ Penggunaan Storage: ${usedMB.toFixed(2)} MB / 50 MB`;
+        }
+    }
+}
 
         initDB();
     </script>
