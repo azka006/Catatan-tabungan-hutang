@@ -753,18 +753,25 @@ function syncHutangToSheet(dataHutang, riwayatHutang) {
         });
 
         function saveTabungan(data) {
-            const tx = db.transaction('riwayatTabungan', 'readwrite');
-            const store = tx.objectStore('riwayatTabungan');
-            store.add(data);
-            tx.oncomplete = () => {
-                showNotification('Tabungan berhasil disimpan', 'success');
-                loadTabungan();
-                populateDatalists();
-                updateStorageUsage();
-                document.getElementById('tabunganForm').reset();
-            };
-            tx.onerror = () => showNotification('Error simpan tabungan', 'error');
-        }
+    const tx = db.transaction('riwayatTabungan', 'readwrite');
+    const store = tx.objectStore('riwayatTabungan');
+    store.add(data);
+    tx.oncomplete = () => {
+        showNotification('Tabungan berhasil disimpan', 'success');
+        loadTabungan();
+        populateDatalists();
+        updateStorageUsage();
+        document.getElementById('tabunganForm').reset();
+
+        // Sync ke Google Sheet
+        const dataTabungan = {
+            nama: data.nama,
+            total: data.jumlah, // atau hitung total tabungan, sesuaikan kebutuhan
+        };
+        syncTabunganToSheet(dataTabungan, data);
+    };
+    tx.onerror = () => showNotification('Error simpan tabungan', 'error');
+}
 
         function loadTabungan(search = '') {
             const tx = db.transaction('riwayatTabungan');
