@@ -914,21 +914,24 @@ function syncHutangToSheet(dataHutang, riwayatHutang) {
         }
 
         function saveHutang(data) {
-            const tx = db.transaction(['hutang', 'riwayatHutang'], 'readwrite');
-            const hutangStore = tx.objectStore('hutang');
-            const riwayatStore = tx.objectStore('riwayatHutang');
-            hutangStore.add(data);
-            riwayatStore.add({ ...data, type: 'hutang' });
-            tx.oncomplete = () => {
-                showNotification('Hutang berhasil disimpan', 'success');
-                loadHutang();
-                populateDatalists();
-                updateStorageUsage();
-                document.getElementById('hutangForm').reset();
-                document.getElementById('totalHutangBunga').value = '';
-            };
-            tx.onerror = () => showNotification('Error simpan hutang', 'error');
-        }
+    const tx = db.transaction(['hutang', 'riwayatHutang'], 'readwrite');
+    const hutangStore = tx.objectStore('hutang');
+    const riwayatStore = tx.objectStore('riwayatHutang');
+    hutangStore.add(data);
+    riwayatStore.add({ ...data, type: 'hutang' });
+    tx.oncomplete = () => {
+        showNotification('Hutang berhasil disimpan', 'success');
+        loadHutang();
+        populateDatalists();
+        updateStorageUsage();
+        document.getElementById('hutangForm').reset();
+        document.getElementById('totalHutangBunga').value = '';
+
+        // Sync ke Google Sheet
+        syncHutangToSheet(data, { ...data, type: 'hutang' });
+    };
+    tx.onerror = () => showNotification('Error simpan hutang', 'error');
+}
 
         function loadHutang(search = '') {
             const tx = db.transaction('hutang');
