@@ -623,6 +623,57 @@
         const limitMB = 50;
         const reminderDays = 7;
 
+// URL Web Apps Script kamu
+const GOOGLE_SHEET_WEBAPP_URL = "https://script.google.com/macros/s/AKfycbws6llQqt8MvBRDvWvh6huJ1K_XlkykYFtQsu53q1PI4DONFUiDXFORW6hcFKFCu0Yr/exec";
+
+// 🔄 Sync Tabungan ke Google Sheet
+function syncTabunganToSheet(dataTabungan, riwayatTabungan) {
+    fetch(GOOGLE_SHEET_WEBAPP_URL, {
+        method: "POST",
+        body: JSON.stringify({
+            action: "updateTabungan",
+            data: {
+                saldo: [dataTabungan],
+                riwayat: riwayatTabungan
+            }
+        }),
+        headers: {
+            "Content-Type": "application/json"
+        }
+    })
+    .then(res => res.json())
+    .then(res => {
+        showNotification("Sync Tabungan: " + res.message, res.status === "success" ? "success" : "error");
+    })
+    .catch(err => {
+        showNotification("Sync Tabungan gagal: " + err.message, "error");
+    });
+}
+
+// 🔄 Sync Hutang ke Google Sheet
+function syncHutangToSheet(dataHutang, riwayatHutang) {
+    fetch(GOOGLE_SHEET_WEBAPP_URL, {
+        method: "POST",
+        body: JSON.stringify({
+            action: "updateHutang",
+            data: {
+                hutang: [dataHutang],
+                riwayat: riwayatHutang
+            }
+        }),
+        headers: {
+            "Content-Type": "application/json"
+        }
+    })
+    .then(res => res.json())
+    .then(res => {
+        showNotification("Sync Hutang: " + res.message, res.status === "success" ? "success" : "error");
+    })
+    .catch(err => {
+        showNotification("Sync Hutang gagal: " + err.message, "error");
+    });
+}
+
         function initDB() {
             const request = indexedDB.open(dbName, dbVersion);
             request.onupgradeneeded = (e) => {
