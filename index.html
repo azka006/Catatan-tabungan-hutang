@@ -823,6 +823,7 @@
             const potongAdmin = document.getElementById('potongAdmin').checked;
             saveTabungan({ nama, tanggal, jumlah, admin, potongAdmin, type: 'pengambilan' });
             loadTabungan();
+document.getElementById('bonForm').reset();
         });
 
         function calculateAdmin() {
