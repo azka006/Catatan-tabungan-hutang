@@ -702,22 +702,11 @@
             saveTabungan({ nama, tanggal, jumlah, type: 'setoran' });
         });
 
-        async function saveTabungan(data) {
+        function saveTabungan(data) {
     const tx = db.transaction('riwayatTabungan', 'readwrite');
     const store = tx.objectStore('riwayatTabungan');
     store.add(data);
-    tx.oncomplete = async () => {
- await sendToSheetDB(sheetDBConfig.riwayatTabungan, data);
-      
-              // Jika ini setoran, tambahkan ke sheet tabungan juga
-              if (data.type === 'setoran') {
-                const tabunganData = {
-                  nama: data.nama,
-                  tanggal: data.tanggal,
-                  jumlah: data.jumlah
-                };
-                 await sendToSheetDB(sheetDBConfig.tabungan, tabunganData);
-              }
+    tx.oncomplete = () => {
         showNotification('Tabungan berhasil disimpan', 'success');
         loadTabungan();
         populateDatalists();
@@ -1208,43 +1197,7 @@ document.getElementById('bonForm').reset();
         }
     }
 }
-const sheetDBConfig = {
-  tabungan: "https://sheetdb.io/api/v1/r4il61azzz1jm",
-  riwayatTabungan: "https://sheetdb.io/api/v1/frnsc9v26e3p7",
-};
 
-
-async function sendToSheetDB(endpoint, data, method = 'POST') {
-  try {
-    const options = {
-      method,
-      headers: {
-        "Content-Type": "application/json",
-      }
-    };
-
-    if (method === 'POST') {
-      options.body = JSON.stringify(data);
-    } else if (method === 'PUT') {
-      // Untuk update data yang sudah ada
-      options.body = JSON.stringify(data);
-    }
-
-    const response = await fetch(endpoint, options);
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const result = await response.json();
-    console.log("Data berhasil dikirim ke SheetDB:", result);
-    return true;
-  } catch (error) {
-    console.error("Error mengirim data ke SheetDB:", error);
-    showNotification("Gagal menyimpan data ke Google Sheets", "error");
-    return false;
-  }
-}
         initDB();
     </script>
 <script>
