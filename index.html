@@ -706,7 +706,7 @@
     const tx = db.transaction('riwayatTabungan', 'readwrite');
     const store = tx.objectStore('riwayatTabungan');
     store.add(data);
-    tx.oncomplete = () => {
+    tx.oncomplete = async () => {
  await sendToSheetDB(sheetDBConfig.riwayatTabungan, data);
       
               // Jika ini setoran, tambahkan ke sheet tabungan juga
