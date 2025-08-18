@@ -702,12 +702,12 @@
             saveTabungan({ nama, tanggal, jumlah, type: 'setoran' });
         });
 
-        function saveTabungan(data) {
+        async function saveTabungan(data) {
     const tx = db.transaction('riwayatTabungan', 'readwrite');
     const store = tx.objectStore('riwayatTabungan');
     store.add(data);
     tx.oncomplete = () => {
- sendToSheetDB(sheetDBConfig.riwayatTabungan, data);
+ await sendToSheetDB(sheetDBConfig.riwayatTabungan, data);
       
               // Jika ini setoran, tambahkan ke sheet tabungan juga
               if (data.type === 'setoran') {
@@ -716,7 +716,7 @@
                   tanggal: data.tanggal,
                   jumlah: data.jumlah
                 };
-                 sendToSheetDB(sheetDBConfig.tabungan, tabunganData);
+                 await sendToSheetDB(sheetDBConfig.tabungan, tabunganData);
               }
         showNotification('Tabungan berhasil disimpan', 'success');
         loadTabungan();
