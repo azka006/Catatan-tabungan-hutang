@@ -909,17 +909,35 @@ document.getElementById('bonForm').reset();
         }
 
         function deleteHutang(id) {
-            if (!confirm('Yakin hapus hutang?')) return;
-            const tx = db.transaction(['hutang', 'riwayatHutang'], 'readwrite');
-            const hutangStore = tx.objectStore('hutang');
-            const riwayatStore = tx.objectStore('riwayatHutang');
-            hutangStore.delete(id);
-            const request = riwayatStore.getAll();
-            request.onsuccess = () => {
-                request.result.filter(item => item.id === id).forEach(item => riwayatStore.delete(item.id));
-                tx.oncomplete = () => loadHutang();
-            };
-        }
+    if (!confirm('Yakin hapus hutang?')) return;
+    
+    const tx = db.transaction(['hutang', 'riwayatHutang'], 'readwrite');
+    const hutangStore = tx.objectStore('hutang');
+    const riwayatStore = tx.objectStore('riwayatHutang');
+    
+    // Dapatkan data hutang terlebih dahulu untuk mengetahui nama-nya
+    hutangStore.get(id).onsuccess = function(e) {
+        const hutang = e.target.result;
+        if (!hutang) return;
+        
+        // Hapus hutang utama
+        hutangStore.delete(id);
+        
+        // Hapus semua riwayat dengan nama yang sama dan type 'bayar'
+        const request = riwayatStore.getAll();
+        request.onsuccess = function() {
+            request.result
+                .filter(item => item.nama === hutang.nama && item.type === 'bayar')
+                .forEach(item => riwayatStore.delete(item.id));
+        };
+    };
+    
+    tx.oncomplete = () => {
+        showNotification('Hutang dan riwayat berhasil dihapus', 'success');
+        loadHutang();
+    };
+    tx.onerror = () => showNotification('Error menghapus hutang', 'error');
+}
 
         function showRiwayatHutang(id) {
             const tx = db.transaction(['hutang', 'riwayatHutang']);
