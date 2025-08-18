@@ -702,7 +702,7 @@
             saveTabungan({ nama, tanggal, jumlah, type: 'setoran' });
         });
 
-        function saveTabungan(data) {
+       async function saveTabungan(data) {
     const tx = db.transaction('riwayatTabungan', 'readwrite');
     const store = tx.objectStore('riwayatTabungan');
     store.add(data);
