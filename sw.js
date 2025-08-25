@@ -2,10 +2,8 @@ const CACHE_NAME = 'finansialku-v1';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
-  '/styles.css',
-  '/app.js',
-  '/icons/icon-72x72.png',
-  '/icons/icon-192x192.png'
+  'icon-512.png',
+  'icon-192.png'
 ];
 
 // Event Install
