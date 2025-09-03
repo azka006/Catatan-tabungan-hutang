@@ -1142,16 +1142,30 @@ document.getElementById('bonForm').reset();
         }
 
         function saveLastBackup() {
-            const now = new Date().toLocaleString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            const tx = db.transaction('settings', 'readwrite');
-            tx.objectStore('settings').put({ key: 'lastBackup', value: now });
-            updateLastBackup();
-        }
+          const now = new Date().toISOString();
+          const tx = db.transaction('settings', 'readwrite');
+          tx.objectStore('settings').put({ key: 'lastBackup', value: now });
+          updateLastBackup();
+      }
 
         function updateLastBackup() {
             const tx = db.transaction('settings');
             tx.objectStore('settings').get('lastBackup').onsuccess = (e) => {
-                document.getElementById('lastBackup').textContent = `Terakhir Backup: ${e.target.result ? e.target.result.value : 'Belum Pernah'}`;
+                if (e.target.result) {
+                    const backupDate = new Date(e.target.result.value);
+                    const formattedDate = backupDate.toLocaleString('id-ID', { 
+                        weekday: 'long', 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric', 
+                        hour: '2-digit', 
+                        minute: '2-digit', 
+                        second: '2-digit' 
+                    });
+                    document.getElementById('lastBackup').textContent = `Terakhir Backup: ${formattedDate}`;
+                } else {
+                    document.getElementById('lastBackup').textContent = 'Terakhir Backup: Belum Pernah';
+                }
             };
         }
 
@@ -1160,9 +1174,9 @@ document.getElementById('bonForm').reset();
             tx.objectStore('settings').get('lastBackup').onsuccess = (e) => {
                 const last = e.target.result ? new Date(e.target.result.value) : null;
                 if (!last || (Date.now() - last.getTime()) / (1000 * 60 * 60 * 24) >= reminderDays) {
-                    if (confirm('Waktunya backup! Sudah 7 hari. klik  "OK" untuk backup via WA?')) {
+                    if (confirm('Waktunya backup! Sudah 7 hari atau belum pernah backup. OK untuk backup via WA?')) {
                         const waNumber = '6289661006297';
-                        const text = 'Nang, Waktu e Backup data aplikasi Catatan';
+                        const text = 'Backup data aplikasi: ' + encodeURIComponent(JSON.stringify({ /* data */ }));
                         window.open(`https://wa.me/${waNumber}?text=${text}`, '_blank');
                         saveLastBackup();
                     }
